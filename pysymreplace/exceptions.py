@@ -1,0 +1,2 @@
+class NotSymlinkError(Exception):
+    pass
