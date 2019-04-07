@@ -1,5 +1,7 @@
 venv/
 pip-selfcheck.json
 
+.coverage
+
 *.swp
 *.pyc
