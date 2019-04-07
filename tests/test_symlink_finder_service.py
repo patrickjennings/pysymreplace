@@ -11,6 +11,7 @@ def test_symlink_finder_finds_single_symlink(tmp_path):
 
     assert symlink_paths == set([symlink])
 
+
 def test_symlink_finder_finds_given_path_to_symlink(tmp_path):
     symlink = tmp_path / 'symlink'
     symlink.symlink_to('target')

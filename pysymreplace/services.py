@@ -1,5 +1,6 @@
+from itertools import permutations
 from pathlib import Path
-from pysymreplace.exceptions import NotSymlinkError
+from pysymreplace.exceptions import NotSymlinkError, SameRelativePathsError
 from pysymreplace.logging import logger
 
 
@@ -53,8 +54,23 @@ class SymlinkReplacerService:
         if target_path.is_dir():
             source_path.unlink()
 
-        # replace target with source
-        source_path.replace(target_path)
+        # Replace target with source
+        target_path.rename(source_path)
+
+    def _validate_symlinks(self, symlink_paths):
+        resolved_paths = (
+            Path(symlink_path).resolve() for symlink_path in symlink_paths
+        )
+
+        # Validate that the two references are not relative to each other.
+        for first_path, second_path in permutations(resolved_paths, 2):
+            try:
+                first_path.relative_to(second_path)
+            except ValueError as e:
+                pass
+            else:
+                message = '{} & {}'.format(first_path, second_path)
+                raise SameRelativePathsError(message)
 
     def replace_symlink_with_target(self, symlink_path):
         symlink_path = Path(symlink_path)
@@ -66,5 +82,6 @@ class SymlinkReplacerService:
         logger.debug('%s -> %s', target_path, symlink_path)
 
     def replace_symlinks_with_target(self, symlink_paths):
+        self._validate_symlinks(symlink_paths)
         for symlink_path in symlink_paths:
             self.replace_symlink_with_target(symlink_path)
