@@ -1,5 +1,5 @@
 import pytest
-from pysymreplace.cli import CLIArgumentParser
+from pysymreplace import CLIArgumentParser
 
 
 @pytest.mark.parametrize('arguments', [
