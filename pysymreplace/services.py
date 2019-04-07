@@ -1,4 +1,4 @@
-from itertools import permutations
+from operator import itemgetter
 from pathlib import Path
 from pysymreplace.exceptions import NotSymlinkError, SameRelativePathsError
 from pysymreplace.logging import logger
@@ -57,20 +57,24 @@ class SymlinkReplacerService:
         # Replace target with source
         target_path.rename(source_path)
 
-    def _validate_symlinks(self, symlink_paths):
-        resolved_paths = (
-            Path(symlink_path).resolve() for symlink_path in symlink_paths
-        )
+    def _order_symlinks_for_replacement(self, symlink_paths):
+        resolved_path_mapping = {
+            symlink_path: symlink_path.resolve()
+            for symlink_path in symlink_paths
+        }
 
-        # Validate that the two references are not relative to each other.
-        for first_path, second_path in permutations(resolved_paths, 2):
-            try:
-                first_path.relative_to(second_path)
-            except ValueError as e:
-                pass
-            else:
-                message = '{} & {}'.format(first_path, second_path)
-                raise SameRelativePathsError(message)
+        # Validate that two references are not referencing each other.
+        resolved_paths = set(resolved_path_mapping.values())
+        if len(resolved_path_mapping) != len(resolved_paths):
+            duplicate_resolved_paths = _find_duplicates_values(resolved_path_mapping)
+            message = 'Duplicate Paths: {}'.format(duplicate_resolved_paths)
+            raise SameRelativePathsError(message)
+
+        return sorted(
+            resolved_path_mapping,
+            key=resolved_path_mapping.__getitem__,
+            reverse=True
+        )
 
     def replace_symlink_with_target(self, symlink_path):
         symlink_path = Path(symlink_path)
@@ -82,6 +86,22 @@ class SymlinkReplacerService:
         logger.debug('%s -> %s', target_path, symlink_path)
 
     def replace_symlinks_with_target(self, symlink_paths):
-        self._validate_symlinks(symlink_paths)
-        for symlink_path in symlink_paths:
+        symlink_paths = (Path(symlink_path) for symlink_path in symlink_paths)
+        ordered_symlink_paths = self._order_symlinks_for_replacement(symlink_paths)
+
+        for symlink_path in ordered_symlink_paths:
             self.replace_symlink_with_target(symlink_path)
+
+
+def _find_duplicates_values(mapping):
+    from collections import defaultdict
+
+    multi_dict = defaultdict(list)
+    for key, value in mapping.items():
+        multi_dict[value].append(key)
+
+    return [
+        value_list
+        for key, value_list in multi_dict.items()
+        if len(value_list) > 1
+    ]
