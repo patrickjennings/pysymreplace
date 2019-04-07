@@ -11,7 +11,7 @@ def test_symlink_finder_finds_single_symlink(tmp_path):
 
     assert symlink_paths == set([symlink])
 
-def test_symlink_finder_finds_direct_path_to_symlink(tmp_path):
+def test_symlink_finder_finds_given_path_to_symlink(tmp_path):
     symlink = tmp_path / 'symlink'
     symlink.symlink_to('target')
 
@@ -65,3 +65,35 @@ def test_symlink_finder_raises_exception_on_link_loop(tmp_path):
 
     with pytest.raises(OSError):
         finder.find_symlinks([tmp_path])
+
+
+def test_symlink_finder_follows_symlink(tmp_path):
+    directory = tmp_path / 'directory'
+    directory.mkdir()
+
+    parent_symlink = tmp_path / 'parent_symlink'
+    parent_symlink.symlink_to(directory)
+
+    child_symlink = directory / 'child'
+    child_symlink.symlink_to('child_symlink')
+
+    finder = SymlinkFinderService(follow_symlinks=True)
+    symlink_paths = finder.find_symlinks([tmp_path])
+
+    assert symlink_paths == set([parent_symlink, child_symlink])
+
+
+def test_symlink_finder_doesnt_follow_symlink(tmp_path):
+    directory = tmp_path / 'directory'
+    directory.mkdir()
+
+    parent_symlink = tmp_path / 'parent_symlink'
+    parent_symlink.symlink_to(directory)
+
+    child_symlink = directory / 'child'
+    child_symlink.symlink_to('child_symlink')
+
+    finder = SymlinkFinderService(follow_symlinks=False)
+    symlink_paths = finder.find_symlinks([tmp_path])
+
+    assert symlink_paths == set([parent_symlink, child_symlink])
