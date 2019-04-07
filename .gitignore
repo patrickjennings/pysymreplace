@@ -1,6 +1,11 @@
 venv/
 pip-selfcheck.json
 
+build/
+dist/
+pysymreplace.egg-info/
+
+.tox/
 .coverage
 
 *.swp

@@ -98,3 +98,17 @@ def test_symlink_replacer_errors_given_link_loop(tmp_path):
         replacer.replace_symlink_with_target(symlink)
 
     assert exc.match('Symlink loop')
+
+
+def test_symlink_replacer_does_not_replace_on_dry_run(tmp_path):
+    target = tmp_path / 'target'
+    target.touch()
+
+    symlink = tmp_path / 'symlink'
+    symlink.symlink_to(target)
+
+    replacer = SymlinkReplacerService(dry_run=True)
+    replacer.replace_symlink_with_target(symlink)
+
+    assert target.exists()
+    assert symlink.exists() and symlink.is_symlink()
