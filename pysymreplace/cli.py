@@ -6,16 +6,17 @@ Argument = namedtuple('Argument', ['type', 'keywords'])
 
 
 class CLIArgumentParser:
-    cli_description = 'Replaces all symbolic links with the physical files.'
+    cli_description = 'Replaces all symbolic links with its target.'
     cli_arguments = (
         Argument('file_paths', {
-                'metavar': 'FILE',
+                'metavar': 'SOURCE',
                 'nargs': '+',
                 'type': str,
-                'help': 'Path to replace symlink files or directories.'
+                'help': 'Source path to recursively replace symlinks with their targets.'
             }
         ),
         # TODO: implement follow symlink argument
+        # TODO: implement dry run
     )
 
     @property
