@@ -59,8 +59,10 @@ def test_symlink_finder_finds_symlink_recursively(tmp_path):
 
 
 def test_symlink_finder_raises_exception_on_link_loop(tmp_path):
+    pytest.importorskip('pathlib', reason="skip pathlib2")
+
     symlink = tmp_path / 'symlink'
-    symlink.symlink_to('symlink')
+    symlink.symlink_to(symlink)
 
     finder = SymlinkFinderService()
 

@@ -37,7 +37,7 @@ def test_symlink_replacer_replaces_parent_and_child(tmp_path):
     assert not directory.exists()
     assert not target.exists()
     assert parent_symlink.exists() and not parent_symlink.is_symlink()
-    assert (parent_symlink / 'child').exists()
+    assert child_symlink.exists()
 
 
 def test_symlink_replacer_replaces_cross_symlinks(tmp_path):
@@ -59,7 +59,7 @@ def test_symlink_replacer_replaces_cross_symlinks(tmp_path):
     assert not directory.exists()
     assert not target.exists()
     assert parent_symlink.exists() and not parent_symlink.is_symlink()
-    assert (parent_symlink / 'child').exists()
+    assert child_symlink.exists()
 
 
 def test_symlink_replacer_errors_given_same_references(tmp_path):
@@ -84,7 +84,7 @@ def test_symlink_replacer_errors_given_invalid_symlink(tmp_path):
 
     replacer = SymlinkReplacerService()
 
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(OSError):
         replacer.replace_symlink_with_target(symlink)
 
 

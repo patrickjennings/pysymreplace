@@ -21,4 +21,7 @@ setuptools.setup(
     entry_points = {
         'console_scripts': ['pysymreplace = pysymreplace:main']
     },
+    install_requires = [
+        'pathlib2;python_version<"3.0"',
+    ],
 )

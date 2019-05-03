@@ -1,7 +1,12 @@
+from collections import defaultdict
 from operator import itemgetter
-from pathlib import Path
 from pysymreplace.exceptions import NotSymlinkError, SameRelativePathsError
-from pysymreplace.logging import logger
+from pysymreplace.symlogger import logger
+
+try:
+    from pathlib import Path
+except ImportError as e:
+    from pathlib2 import Path
 
 
 class SymlinkFinderService:
@@ -22,7 +27,8 @@ class SymlinkFinderService:
                 yield self._validate_symlink(file_path)
             except NotSymlinkError:
                 if file_path.is_dir():
-                    yield from self._get_symlinks_from_directory(file_path)
+                    for symlink in self._get_symlinks_from_directory(file_path):
+                        yield symlink
 
     def find_symlinks(self, file_paths):
         symlink_paths = set()
@@ -94,8 +100,6 @@ class SymlinkReplacerService:
 
 
 def _find_duplicates_values(mapping):
-    from collections import defaultdict
-
     multi_dict = defaultdict(list)
     for key, value in mapping.items():
         multi_dict[value].append(key)

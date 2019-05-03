@@ -1,6 +1,6 @@
 from pysymreplace.cli import CLIArgumentParser
-from pysymreplace.collections import SymlinkCollection
+from pysymreplace.symcollections import SymlinkCollection
 from pysymreplace.exceptions import *
-from pysymreplace.main import main
+from pysymreplace.main import main, find_and_replace_symlinks
 from pysymreplace.services import SymlinkFinderService, SymlinkReplacerService
-from pysymreplace import logging
+from pysymreplace import symlogger
